@@ -316,7 +316,7 @@ export default function DesfechosPage() {
                       </td>
                       <td className="px-6 py-3.5">
                         <Badge
-                          variant={desfecho.tipo === 'alta' ? 'success' : 'danger'}
+                          variant={desfecho.tipo === 'alta' ? 'success' : 'error'}
                           className="uppercase text-[10px] tracking-wider"
                         >
                           {desfecho.tipo === 'alta' ? 'Alta' : 'Óbito'}
