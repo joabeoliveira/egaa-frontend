@@ -59,3 +59,24 @@ export interface PacientesParams {
   data_inicio?: string;
   data_fim?: string;
 }
+
+export interface Desfecho {
+  id: number;
+  prontuario: string;
+  tipo: 'alta' | 'obito';
+  data_desfecho: string;
+  descricao: string | null;
+  usuario_responsavel: string | null;
+  intervencao_id: number | null;
+  created_at: string | null;
+  updated_at: string | null;
+}
+
+export interface IndicadoresDesfecho {
+  total_desfechos: number;
+  total_altas: number;
+  total_obitos: number;
+  pacientes_com_desfecho: number;
+  por_tipo: { tipo: string; total: number }[];
+  por_mes: { mes: string; total: number }[];
+}

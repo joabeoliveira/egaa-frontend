@@ -6,7 +6,7 @@ export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
   // Paths requiring authentication
-  const securePaths = ['/dashboard', '/longa-permanencia', '/configuracoes', '/upload'];
+  const securePaths = ['/dashboard', '/longa-permanencia', '/configuracoes', '/upload', '/desfechos'];
   const isSecurePath = securePaths.some(path => pathname.startsWith(path));
 
   // If accessing root "/", redirect to dashboard

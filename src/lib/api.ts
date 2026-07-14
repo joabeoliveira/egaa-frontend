@@ -1,10 +1,16 @@
 import { getCookie } from './utils';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || '';
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || '').replace(/\/+$/, '');
+
+/** Remove prefixo /api do path se a API_URL já termina com /api */
+function buildUrl(path: string): string {
+  const cleanPath = API_URL && /\/api$/.test(API_URL) ? path.replace(/^\/api/, '') : path;
+  return `${API_URL}${cleanPath}`;
+}
 
 export const api = {
   async get(path: string, options?: { params?: Record<string, any> }) {
-    let url = `${API_URL}${path}`;
+    let url = buildUrl(path);
     if (options?.params) {
       const q = new URLSearchParams();
       Object.entries(options.params).forEach(([k, v]) => {
@@ -21,21 +27,21 @@ export const api = {
   },
 
   async post(path: string, data?: any) {
-    return this.request(`${API_URL}${path}`, {
+    return this.request(buildUrl(path), {
       method: 'POST',
       body: JSON.stringify(data),
     });
   },
 
   async put(path: string, data?: any) {
-    return this.request(`${API_URL}${path}`, {
+    return this.request(buildUrl(path), {
       method: 'PUT',
       body: JSON.stringify(data),
     });
   },
 
   async delete(path: string) {
-    return this.request(`${API_URL}${path}`, {
+    return this.request(buildUrl(path), {
       method: 'DELETE',
     });
   },

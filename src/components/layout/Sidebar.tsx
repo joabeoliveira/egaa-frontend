@@ -11,7 +11,8 @@ import {
   Upload,
   LogOut,
   User,
-  HeartPulse
+  HeartPulse,
+  Target
 } from 'lucide-react';
 import { VersionBadge } from './VersionBadge';
 import { cn } from '@/lib/utils';
@@ -30,6 +31,11 @@ export function Sidebar() {
       href: '/longa-permanencia',
       label: 'Longa Permanência',
       icon: BedDouble,
+    },
+    {
+      href: '/desfechos',
+      label: 'Desfechos EGAA',
+      icon: Target,
     },
     {
       href: '/upload',

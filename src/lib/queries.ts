@@ -114,3 +114,61 @@ export function useIndicadores() {
     queryFn: () => api.get('/api/egaa/indicadores'),
   });
 }
+
+// ─── Desfechos EGAA ──────────────────────────────────────────────
+
+export function useDesfechos(filters?: { prontuario?: string; tipo?: string; data_inicio?: string; data_fim?: string }) {
+  return useQuery({
+    queryKey: ['desfechos', filters],
+    queryFn: () => api.get('/api/egaa/desfechos', { params: filters }),
+  });
+}
+
+export function useCriarDesfecho() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (data: {
+      prontuario: string;
+      tipo: string;
+      data_desfecho: string;
+      descricao?: string;
+      usuario_responsavel?: string;
+      intervencao_id?: number;
+    }) => api.post('/api/egaa/desfechos', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['desfechos'] });
+      queryClient.invalidateQueries({ queryKey: ['indicadores-desfecho'] });
+      queryClient.invalidateQueries({ queryKey: ['pacientes'] });
+    },
+  });
+}
+
+export function useAtualizarDesfecho() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: Partial<{ prontuario: string; tipo: string; data_desfecho: string; descricao: string; usuario_responsavel: string; intervencao_id: number }> }) =>
+      api.put(`/api/egaa/desfechos/${id}`, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['desfechos'] });
+      queryClient.invalidateQueries({ queryKey: ['indicadores-desfecho'] });
+    },
+  });
+}
+
+export function useRemoverDesfecho() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: number) => api.delete(`/api/egaa/desfechos/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['desfechos'] });
+      queryClient.invalidateQueries({ queryKey: ['indicadores-desfecho'] });
+    },
+  });
+}
+
+export function useIndicadoresDesfecho() {
+  return useQuery({
+    queryKey: ['indicadores-desfecho'],
+    queryFn: () => api.get('/api/egaa/indicadores/desfechos'),
+  });
+}

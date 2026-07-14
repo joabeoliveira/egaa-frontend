@@ -1,4 +1,4 @@
-import { Paciente, Intervencao, Pendencia, TipoIntervencao } from '@/types';
+import { Desfecho, IndicadoresDesfecho, Paciente, Intervencao, Pendencia, TipoIntervencao } from '@/types';
 
 // Let's pre-populate mock data
 let tiposIntervencao: TipoIntervencao[] = [
@@ -16,6 +16,64 @@ let pendenciasMock: Pendencia[] = [
   { id: 3, prontuario: '5420199', codigo: 'exame_pendente', resolvida: false },
   { id: 4, prontuario: '1273948', codigo: 'assistencia_social', resolvida: false },
   { id: 5, prontuario: '9482711', codigo: 'fisioterapia', resolvida: false },
+];
+
+let desfechosMock: Desfecho[] = [
+  {
+    id: 1,
+    prontuario: '8399062',
+    tipo: 'alta',
+    data_desfecho: '2026-07-13',
+    descricao: 'Alta hospitalar com apoio do EGAA. Paciente recebeu alta com oxigenoterapia domiciliar após articulação com Assistência Social.',
+    usuario_responsavel: 'ENF EDUARDO',
+    intervencao_id: 1,
+    created_at: '2026-07-13T10:30:00',
+    updated_at: '2026-07-13T10:30:00'
+  },
+  {
+    id: 2,
+    prontuario: '5420199',
+    tipo: 'alta',
+    data_desfecho: '2026-07-10',
+    descricao: 'Alta para cuidados paliativos domiciliares. Familiares orientados e suporte da atenção primária acionado.',
+    usuario_responsavel: 'DRA CLAUDIA',
+    intervencao_id: null,
+    created_at: '2026-07-10T14:00:00',
+    updated_at: '2026-07-10T14:00:00'
+  },
+  {
+    id: 3,
+    prontuario: '3849102',
+    tipo: 'obito',
+    data_desfecho: '2026-07-12',
+    descricao: 'Óbito por progressão de neoplasia. Paciente em cuidados paliativos, equipe EGAA prestou suporte à família.',
+    usuario_responsavel: 'ENF EDUARDO',
+    intervencao_id: null,
+    created_at: '2026-07-12T08:15:00',
+    updated_at: '2026-07-12T08:15:00'
+  },
+  {
+    id: 4,
+    prontuario: '1273948',
+    tipo: 'alta',
+    data_desfecho: '2026-07-08',
+    descricao: 'Alta para hospital dia com suporte multidisciplinar. Transferência articulada pelo EGAA.',
+    usuario_responsavel: 'ASS SOC ANA',
+    intervencao_id: null,
+    created_at: '2026-07-08T16:45:00',
+    updated_at: '2026-07-08T16:45:00'
+  },
+  {
+    id: 5,
+    prontuario: '9482711',
+    tipo: 'alta',
+    data_desfecho: '2026-07-05',
+    descricao: 'Alta com acompanhamento ambulatorial. Encaminhamentos realizados e família orientada.',
+    usuario_responsavel: 'DRA CLAUDIA',
+    intervencao_id: null,
+    created_at: '2026-07-05T11:20:00',
+    updated_at: '2026-07-05T11:20:00'
+  }
 ];
 
 let intervencoesMock: Intervencao[] = [
@@ -592,6 +650,104 @@ export const dbMock = {
     return {
       sucesso: true,
       mensagem: `${count} registros processados e atualizados com sucesso via carga de ${tipo}.`
+    };
+  },
+
+  // ─── Desfechos EGAA ──────────────────────────────────────
+
+  getDesfechos(filters?: { prontuario?: string; tipo?: string; data_inicio?: string; data_fim?: string }) {
+    let filtered = [...desfechosMock];
+
+    if (filters?.prontuario) {
+      filtered = filtered.filter(d => d.prontuario.includes(filters.prontuario!));
+    }
+    if (filters?.tipo) {
+      filtered = filtered.filter(d => d.tipo === filters.tipo);
+    }
+    if (filters?.data_inicio) {
+      filtered = filtered.filter(d => d.data_desfecho >= filters.data_inicio!);
+    }
+    if (filters?.data_fim) {
+      filtered = filtered.filter(d => d.data_desfecho <= filters.data_fim!);
+    }
+
+    // Sort by most recent first
+    filtered.sort((a, b) => b.data_desfecho.localeCompare(a.data_desfecho));
+
+    return filtered;
+  },
+
+  addDesfecho(data: { prontuario: string; tipo: string; data_desfecho: string; descricao?: string; usuario_responsavel?: string; intervencao_id?: number }) {
+    const newId = desfechosMock.length > 0 ? Math.max(...desfechosMock.map(d => d.id)) + 1 : 1;
+    const now = new Date().toISOString();
+    const newDesfecho: Desfecho = {
+      id: newId,
+      prontuario: data.prontuario,
+      tipo: data.tipo as 'alta' | 'obito',
+      data_desfecho: data.data_desfecho,
+      descricao: data.descricao || null,
+      usuario_responsavel: data.usuario_responsavel || 'SISTEMA',
+      intervencao_id: data.intervencao_id || null,
+      created_at: now,
+      updated_at: now
+    };
+    desfechosMock.push(newDesfecho);
+    return newDesfecho;
+  },
+
+  updateDesfecho(id: number, data: { prontuario?: string; tipo?: string; data_desfecho?: string; descricao?: string; usuario_responsavel?: string; intervencao_id?: number }) {
+    const idx = desfechosMock.findIndex(d => d.id === id);
+    if (idx !== -1) {
+      desfechosMock[idx] = {
+        ...desfechosMock[idx],
+        ...data,
+        updated_at: new Date().toISOString()
+      } as Desfecho;
+      return desfechosMock[idx];
+    }
+    return null;
+  },
+
+  deleteDesfecho(id: number) {
+    const idx = desfechosMock.findIndex(d => d.id === id);
+    if (idx !== -1) {
+      const removed = desfechosMock[idx];
+      desfechosMock.splice(idx, 1);
+      return removed;
+    }
+    return null;
+  },
+
+  getIndicadoresDesfecho(): IndicadoresDesfecho {
+    const total_desfechos = desfechosMock.length;
+    const total_altas = desfechosMock.filter(d => d.tipo === 'alta').length;
+    const total_obitos = desfechosMock.filter(d => d.tipo === 'obito').length;
+    const pacientes_com_desfecho = new Set(desfechosMock.map(d => d.prontuario)).size;
+
+    // Group by tipo
+    const tipoMap: Record<string, number> = {};
+    desfechosMock.forEach(d => {
+      tipoMap[d.tipo] = (tipoMap[d.tipo] || 0) + 1;
+    });
+    const por_tipo = Object.entries(tipoMap).map(([tipo, total]) => ({ tipo, total }));
+
+    // Group by month
+    const mesMap: Record<string, number> = {};
+    desfechosMock.forEach(d => {
+      const mes = d.data_desfecho.substring(0, 7);
+      mesMap[mes] = (mesMap[mes] || 0) + 1;
+    });
+    const por_mes = Object.entries(mesMap)
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([mes, total]) => ({ mes, total }));
+
+    return {
+      total_desfechos,
+      total_altas,
+      total_obitos,
+      pacientes_com_desfecho,
+      por_tipo,
+      por_mes
     };
   }
 };
