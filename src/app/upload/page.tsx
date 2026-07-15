@@ -75,16 +75,12 @@ export default function UploadPage() {
     };
 
     try {
+      const formData = new FormData();
+      formData.append('file', selectedFile);
+
       const response = await fetch(endpoints[activeTab], {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-          nome_arquivo: selectedFile.name,
-          tamanho: selectedFile.size,
-          conteudo: 'simulado'
-        })
+        body: formData,
       });
 
       const data = await response.json();
@@ -92,11 +88,11 @@ export default function UploadPage() {
       if (response.ok) {
         setUploadResult({
           sucesso: true,
-          mensagem: data.mensagem || 'Carga realizada com sucesso!'
+          mensagem: data.mensagem || `Carga realizada com sucesso! ${data.linhas_processadas || ''} registros processados.`
         });
         setSelectedFile(null);
       } else {
-        throw new Error(data.error || 'Erro no processamento.');
+        throw new Error(data.error || data.detail || 'Erro no processamento.');
       }
     } catch (err: any) {
       setUploadResult({
